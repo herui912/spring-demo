@@ -1,55 +1,57 @@
 package com.service.impl;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import com.model.User;
+import com.repository.UserRepository;
 import com.service.UserService;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
-	public static List<User> userList = new ArrayList<>();
-	private static Long COUNTER = 1l;
-	static {
-		User user = new User(COUNTER++, "Georgina", "Ortega", 24, "Brazil");
-		userList.add(user);
-		user = new User(COUNTER++, "Ross", "Spark", 34, "Mexio");
-		userList.add(user);
-		user = new User(COUNTER++, "Oria", "Mocoy", 19, "USA");
-		userList.add(user);
-		user = new User(COUNTER++, "Jerry", "Hanna", 42, "Canada");
-		userList.add(user);
-	}
+	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	@Override
 	public List<User> findAll() {
-		// System.out.print(userList);
-		return userList.stream()
-			.sorted(Comparator.comparing(User::getId))
-			.collect(Collectors.toList());
+		return userRepository.findAll();
 	}
 	
 	@Override
 	public Optional<User> findById(Long id) {
-		return userList.stream().filter(user -> user.getId() == id).findFirst();
+		return userRepository.findById(id);
 	}
 
 	@Override
 	public void add(User user) {
-		user.setId(COUNTER++);
-		userList.add(user);
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		userRepository.save(user);
 	}
 
 	@Override
 	public Optional<User> update(User user) {
-		Optional<User> userOpt = userList.stream().filter(u -> u.getId() == user.getId()).findFirst();
+		Optional<User> userOpt = userRepository.findById(user.getId());
 		if (userOpt.isPresent()) {
 			User existingUser = userOpt.get();
+			if (user.getUsername() != null) {
+				existingUser.setUsername(user.getUsername());
+			}
+
+			if (user.getPassword() != null) {
+				existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+			}
+
 			if (user.getFirstName() != null) {
 				existingUser.setFirstName(user.getFirstName());
 			}
@@ -66,9 +68,7 @@ public class UserServiceImpl implements UserService {
 				existingUser.setCountry(user.getCountry());
 			}
 
-			userList = userList.stream().filter(u -> u.getId() != existingUser.getId())
-				.collect(Collectors.toList());
-			userList.add(existingUser);
+			userRepository.save(existingUser);
 
 			return Optional.of(existingUser);
 		}
@@ -77,10 +77,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Optional<User> delete(Long id) {
-		Optional<User> userOpt = userList.stream().filter(user -> user.getId() == id).findFirst();
+		Optional<User> userOpt = userRepository.findById(id);
 		if (userOpt.isPresent()) {
-			userList = userList.stream().filter(user -> userOpt.get().getId() != user.getId())
-				.collect(Collectors.toList());
+			userRepository.delete(userOpt.get());
 			return userOpt;
 		}
 		return Optional.empty();

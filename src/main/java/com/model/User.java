@@ -14,6 +14,10 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	@NotNull
+	private String username;
+	@NotNull
+	private String password;
 	@NotNull(message="First name can not be null")
 	private String firstName;
 	@NotNull
@@ -27,9 +31,10 @@ public class User {
 		super();
 	}
 	
-	public User(Long id, String firstName, String lastName, Integer age, String country) {
+	public User(String username, String password, String firstName, String lastName, Integer age, String country) {
 		super();
-		this.id = id;
+		this.username = username;
+		this.password = password;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.age = age;
@@ -39,8 +44,17 @@ public class User {
 	public Long getId() {
 		return id;
 	}
-	public void setId(Long id) {
-		this.id = id;
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	public String getFirstName () {
 		return firstName;
@@ -81,6 +95,16 @@ public class User {
 			return false;
 		} else if (!id.equals(user.id))
 			return false;
+		if (username == null) {
+			if(user.username != null)
+			return false;
+		} else if (!username.equals(user.username))
+			return false;
+		if (password == null) {
+			if(user.password != null)
+			return false;
+		} else if (!password.equals(user.password))
+			return false;
 		if (firstName == null) {
 			if(user.firstName != null)
 			return false;
@@ -106,7 +130,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", age=" + age + ", country=" + country;
+		return "User [id=" + id + ", username=" + username + ", password=" + password + ", firstName=" + firstName + ", lastName=" + lastName + ", age=" + age + ", country=" + country;
 	}
 
 
