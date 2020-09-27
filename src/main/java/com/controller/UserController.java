@@ -15,7 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.service.UserService;
 import com.model.User;
@@ -28,8 +31,9 @@ public class UserController {
 	private UserService userService;
 
 	@GetMapping
-	public ResponseEntity<?> findAll () {
-		return new ResponseEntity<List<User>>(userService.findAll(), HttpStatus.OK);
+	public ResponseEntity<?> findAll (Pageable pageable) {
+		// can use /api/users?page=1&size=5 to display data
+		return new ResponseEntity<Page<User>>(userService.findAll(pageable), HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")
@@ -67,6 +71,12 @@ public class UserController {
 			return new ResponseEntity<User>(optUser.get(), HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<?> findByCriteria(@RequestParam(name="criteria", required=true) String criteria,
+		@RequestParam(name="searchItem", required=true) String searchItem) {
+		return new ResponseEntity<List<User>>(userService.findByCriteria(criteria, searchItem), HttpStatus.OK);
 	}
 
 }
