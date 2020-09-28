@@ -28,6 +28,10 @@ public class LoadUsersinDB implements CommandLineRunner {
 	
 	@Override
 	public void run(String... args) throws Exception {
+
+		if (userRepository.count() > 0) {
+			return;
+		}
 		User user1 = new User("geoO", UUID.randomUUID().toString(), "Georgina", "Ortega", 24, "Brazil");
 		User user2 = new User("rosS", UUID.randomUUID().toString(), "Ross", "Spark", 34, "Mexio");
 		User user3 = new User("oriM", UUID.randomUUID().toString(), "Oria", "Mocoy", 19, "USA");
